@@ -1,6 +1,8 @@
 import React, {useEffect, useState} from 'react'
 import {useNavigate} from "react-router-dom";
 import employeeService from "../services/EmployeeService";
+import Employee from "./Employee";
+import EmployeeService from "../services/EmployeeService";
 
 const EmployeeList = () => {
 
@@ -23,6 +25,17 @@ const EmployeeList = () => {
         fetchData();
     },[])
 
+    const deleteEmployee = (e,id) => {
+        e.preventDefault();
+        EmployeeService.deleteEmployees(id).then((res) => {
+           if(employees){
+               setEmployees((prevElement) => {
+                   return prevElement.filter((employee) => employee.id !== id);
+               })
+           }
+        });
+    }
+
     return (
         <div className="container mx-auto my-4">
             <div className="h-25">
@@ -43,24 +56,11 @@ const EmployeeList = () => {
                     {!loading && (
                         <tbody>
                             {employees.map((employee) => (
-                                <tr>
-                                    <td className="px-5 py-2">
-                                        <div className="text-sm-start">
-                                            {employee.firstName}
-                                        </div></td>
-                                    <td className="px-5 py-2">
-                                        <div className="text-sm-start">
-                                            {employee.lastName}
-                                        </div></td>
-                                    <td className="px-5 py-2">
-                                        <div className="text-sm-start">
-                                            {employee.emailId}
-                                        </div></td>
-                                    <td className="text-end px-5 py-2">
-                                        <a href="#" className="text-danger px-3">Edit</a>
-                                        <a href="#" className="text-danger">Delete</a>
-                                    </td>
-                                </tr>
+                                <Employee
+                                    employee={employee}
+                                    deleteEmployee={deleteEmployee}
+                                    key={employee.id}>
+                                </Employee>
                             ))}
                         </tbody>
                     )}

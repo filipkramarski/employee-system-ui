@@ -1,48 +1,52 @@
-import React, {useState} from 'react'
-import EmployeeService from "../services/EmployeeService";
-import {useNavigate} from "react-router-dom";
+import React, {useEffect} from 'react';
+import {useNavigate, useParams} from "react-router-dom";
+import {useState} from "react";
+import employeeService from "../services/EmployeeService";
 
-const AddEmployee = () => {
-
+const UpdateEmployee = () => {
+    const { id } = useParams();
+    const navigate = useNavigate();
     const [employee, setEmployee] = useState({
-        id:"",
-        firstName:"",
-        lastName:"",
-        emailId:"",
+        id: id,
+        firstName: "",
+        lastName: "",
+        emailId: "",
     });
 
-    const navigate = useNavigate();
-
-    const handleChange = (e) =>{
+    const handleChange = (e) => {
         const value = e.target.value;
-        setEmployee({...employee, [e.target.name]: value })
-    }
+        setEmployee({ ...employee, [e.target.name]: value });
+    };
 
-    const saveEmployee = (e) =>{
-        e.preventDefault();
-        EmployeeService.saveEmployee(employee).then((response)=>{
-            console.log(response);
-            navigate("/employeeList")
-        }).catch((error)=>{
-            console.log(error);
-        });
-    }
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await employeeService.getEmployeeById(employee.id);
+                setEmployee(response.data);
+            } catch (error) {
+                console.log(error);
+            }
+        };
+        fetchData();
+    }, []);
 
-    const reset = (e) =>{
+    const updateEmployee = (e) => {
         e.preventDefault();
-        setEmployee({
-            id:"",
-            firstName:"",
-            lastName:"",
-            emailId:"",
-        });
+        console.log(employee);
+        employeeService.updateEmployee(employee, id)
+            .then((response) => {
+                navigate("/employeeList");
+            })
+            .catch((error) => {
+                console.log(error);
+            });
     };
 
     return (
         <div className="w-25 mx-auto shadow border-bottom">
             <div className="px-4 py-4">
                 <div className="text-opacity-25 fw-semibold">
-                    Add New Employee
+                    Update Employee
                 </div>
                 <div className="align-items-center justify-content-center h-25 my-4">
                     <label className="d-block text-gray font-monospace">First Name</label>
@@ -72,14 +76,13 @@ const AddEmployee = () => {
                     </input>
                 </div>
                 <div className="align-items-center justify-content-center h-25 my-4 ">
-                    <button onClick={saveEmployee}
-                            type="submit" className="btn btn-space rounded text-white fw-semibold bg-success py-2 px-6 m-1">Save</button>
-                    <button onClick={reset}
-                            type="submit" className="btn btn-space rounded text-white fw-semibold bg-danger py-2 px-6 ">Clear</button>
+                    <button onClick={updateEmployee}
+                            type="submit" className="btn btn-space rounded text-white fw-semibold bg-success py-2 px-6 m-1">Update</button>
+                    <button type="submit" className="btn btn-space rounded text-white fw-semibold bg-danger py-2 px-6 ">Cancel</button>
                 </div>
             </div>
         </div>
     );
-};
+}
 
-export default AddEmployee
+export default UpdateEmployee;
